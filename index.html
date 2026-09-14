@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>반짝이는 숲의 마법 열쇠 - 인터랙티브 동화책</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .book-container {
+            width: 100%;
+            max-width: 580px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5, #9333ea);
+            color: white;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
+
+        .page-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .image-box {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            background: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-box img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        .controls-section {
+            background: #0f172a;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border-top: 1px solid #334155;
+        }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .play-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .play-btn:hover {
+            background-color: #059669;
+        }
+
+        .bgm-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            cursor: pointer;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: var(--card-bg);
+            border-top: 1px solid #334155;
+        }
+
+        .nav-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, opacity 0.2s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .page-indicator {
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="book-container">
+        <div class="header">
+            <h1>반짝이는 숲의 마법 열쇠</h1>
+            <p>신비로운 오디오 & BGM 그림동화</p>
+        </div>
+
+        <div class="page-content">
+            <div class="image-box">
+                <img id="storyImage" src="" alt="동화 일러스트">
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="audio-controls">
+                <button class="play-btn" id="playAudioBtn" onclick="toggleAudio()">
+                    ▶ 낭독 & BGM 재생
+                </button>
+                <label class="bgm-toggle">
+                    <input type="checkbox" id="bgmCheck" checked onchange="toggleBGM(this.checked)"> 신비로운 BGM 켜기
+                </label>
+            </div>
+            <audio id="narrationAudio">
+                <source src="ElevenLabs_2026-09-14T13_03_36_Roger - Laid-Back, Casual, Resonant_pre_sp100_s50_sb75_se0_b_m2.mp3" type="audio/mpeg">
+            </audio>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changePage(-1)">이전</button>
+            <span class="page-indicator" id="pageIndicator">1 / 4</span>
+            <button class="nav-btn" id="nextBtn" onclick="changePage(1)">다음</button>
+        </div>
+    </div>
+
+    <script>
+        const pages = [
+            { image: "반짝이는_숲_1페이지.jpg" },
+            { image: "반짝이는_숲_2페이지.jpg" },
+            { image: "반짝이는_숲_3페이지.jpg" },
+            { image: "반짝이는_숲_4페이지.jpg" }
+        ];
+
+        let currentPage = 0;
+        let isPlaying = false;
+
+        const imageElement = document.getElementById("storyImage");
+        const pageIndicator = document.getElementById("pageIndicator");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const playBtn = document.getElementById("playAudioBtn");
+        const audio = document.getElementById("narrationAudio");
+
+        // Web Audio API 기반 신비로운 BGM 합성기 (동굴 & 마법 분위기)
+        let audioCtx = null;
+        let bgmInterval = null;
+        let isBgmEnabled = true;
+
+        const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99]; // C E G C E G (신비로운 아르페지오)
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playMysticNote() {
+            if (!isPlaying || !isBgmEnabled || !audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            const freq = notes[Math.floor(Math.random() * notes.length)];
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.3);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.5);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 2.6);
+        }
+
+        function startBGM() {
+            initAudioContext();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            if (!bgmInterval) {
+                bgmInterval = setInterval(playMysticNote, 600);
+            }
+        }
+
+        function stopBGM() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
+        function toggleAudio() {
+            if (isPlaying) {
+                audio.pause();
+                stopBGM();
+                playBtn.innerText = "▶ 낭독 & BGM 재생";
+                isPlaying = false;
+            } else {
+                audio.play();
+                startBGM();
+                playBtn.innerText = "❚❚ 일시정지";
+                isPlaying = true;
+            }
+        }
+
+        function toggleBGM(enabled) {
+            isBgmEnabled = enabled;
+            if (!enabled) {
+                stopBGM();
+            } else if (isPlaying) {
+                startBGM();
+            }
+        }
+
+        audio.onended = function() {
+            stopBGM();
+            playBtn.innerText = "▶ 낭독 & BGM 다시 듣기";
+            isPlaying = false;
+        };
+
+        function updatePage() {
+            imageElement.src = pages[currentPage].image;
+            pageIndicator.innerText = `${currentPage + 1} / ${pages.length}`;
+            prevBtn.disabled = currentPage === 0;
+            nextBtn.disabled = currentPage === pages.length - 1;
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            if (currentPage < 0) currentPage = 0;
+            if (currentPage >= pages.length) currentPage = pages.length - 1;
+            updatePage();
+        }
+
+        updatePage();
+    </script>
+</body>
+</html>
